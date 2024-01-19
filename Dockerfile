@@ -1,8 +1,12 @@
+# Use the official PHP 8.2 FPM Alpine image as the base
 FROM php:8.2-fpm-alpine
 
+# Set the working directory for subsequent commands
 WORKDIR /var/www/auth
 
-RUN apk add --no-cache php82 \
+# Install required Alpine packages and PHP extensions
+RUN apk add --no-cache \
+    php82 \
     php82-common \
     php82-fpm \
     php82-pdo \
@@ -25,20 +29,28 @@ RUN apk add --no-cache php82 \
     libpng-dev \
     libzip-dev
 
-RUN docker-php-ext-install pdo pdo_mysql
-RUN docker-php-ext-enable pdo_mysql
-RUN docker-php-ext-install zip
+# Install required PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql && \
+    docker-php-ext-enable pdo_mysql && \
+    docker-php-ext-install zip
 
-# Use the default production configuration ($PHP_INI_DIR variable already set by the default image)
+# Use the default production configuration provided by the base image
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
+# Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Copy the application code into the container
 COPY . .
 
-RUN composer install
-
+# Add a user for running the application, if it doesn't already exist
 RUN id -u www-data || adduser -u 1000 -D -S -G www-data www-data
 
+# Install Composer dependencies
+RUN composer install
+
+# Set appropriate permissions on storage directory
 RUN chmod 777 -R storage
+
+# Set ownership of files to the www-data user
 RUN chown -R www-data:www-data .
