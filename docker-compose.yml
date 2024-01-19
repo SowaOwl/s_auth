@@ -1,0 +1,43 @@
+version: '3.7'
+services:
+    nginx:
+        image: nginx:alpine
+        restart: unless-stopped
+        tty: true
+        ports:
+            - 8050:80
+        volumes:
+            - ./:/var/www/auth
+            - .docker/conf/nginx.conf:/etc/nginx/conf.d/default.conf
+        networks:
+            - l_net
+
+    auth:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        environment:
+            SERVICE_NAME: auth
+            SERVICE_TAGS: dev
+        working_dir: /var/www/auth
+        volumes:
+            - ./:/var/www/auth
+        networks:
+            - l_net
+
+    mysql:
+        image: mysql:8.3
+        ports:
+            - 33096:3306
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_DATABASE=auth
+        volumes:
+            - .docker/data/dbdata:/var/lib/mysql
+        networks:
+            - l_net
+
+networks:
+    l_net:
+        driver: bridge
