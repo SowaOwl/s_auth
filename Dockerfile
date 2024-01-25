@@ -23,7 +23,6 @@ RUN apk add --no-cache \
     php82-dom \
     php82-pdo_mysql \
     php82-tokenizer \
-    php82-pecl-redis \
     php82-zlib \
     zlib-dev \
     libpng-dev \
@@ -37,14 +36,14 @@ RUN docker-php-ext-install pdo pdo_mysql && \
 # Use the default production configuration provided by the base image
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# Install Composer globally
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
 # Copy the application code into the container
 COPY . .
 
 # Add a user for running the application, if it doesn't already exist
 RUN id -u www-data || adduser -u 1000 -D -S -G www-data www-data
+
+# Install Composer globally
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install Composer dependencies
 RUN composer install
