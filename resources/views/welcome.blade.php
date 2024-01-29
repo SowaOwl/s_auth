@@ -39,7 +39,7 @@
                 </div>
 
                 <div class="mt-16 flex justify-center">
-                    <h1 style="color: white">AUTH API</h1>
+                    <h1 class="text-xl font-semibold" style="color: white">AUTH API</h1>
                 </div>
 
                 <div class="mt-16">
